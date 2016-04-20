@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load staticfiles %} 
+
+{% block bodycontent %}
+
+<div id="nav-tabs-geoloc">
+<ul class="nav nav-tabs">
+  <li role="presentation"><a href="{% url 'summary' %}">Résumé</a></li>
+  <li role="presentation" class="active"><a href="{% url 'locgeo' %}">Gérer</a></li>
+</ul></div>
+
+<div id="geoloc_pane">
+
+<ol class="breadcrumb">
+	<li><a href="{% url 'locgeo' %}"><span class="glyphicon glyphicon glyphicon-home" aria-hidden="true"></span></a></li>
+	{% if loc1 != 'null' %}
+		{% if loc2 != 'null' %} 
+				<li><a href="{% url 'locgeo' %}{{ loc1|safe }}">{{ loc1|safe }}</a></li>
+			{% else %}
+				<li class="active">{{ loc1 }}</li>
+		{%endif%}
+	{% endif %}
+	{% if loc2 != 'null' %}
+	{% if loc3 != 'null' %} 
+				<li><a href="{% url 'locgeo' %}{{ loc1|safe }}/{{ loc2|safe }}">{{ loc2|safe }}</a></li>
+			{% else %}
+				<li class="active">{{ loc2|safe }}</li>
+		{%endif%}
+	{% endif %}
+	{% if loc3 != 'null' %}
+	<li class="active">{{ loc3|safe }}</li>
+	{% endif %}
+	
+	<div id="conf-geoloc-buttons" class="btn-group btn-group-sm" role="group">
+	{% if creation_authorized %}
+	<button type="button" class="btn btn-default" aria-label="New" id='newloc-button'>
+  <span class="glyphicon glyphicon glyphicon-plus" aria-hidden="true"></span></button>{% endif %}
+  {% if not root %}
+	<button type="button" class="btn btn-default" aria-label="Modify" id='edit-button'>
+  <span class="glyphicon glyphicon glyphicon-cog" aria-hidden="true"></span></button>
+  <button type="button" class="btn btn-default" aria-label="Erase" id='erase-button'>
+  <span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+  {% endif %}</div>
+</ol>
+
+
+<div id="sublocs-div" class="row">
+
+	<div class="col-md-4">
+	{% if not root %}
+	<ul class="list-group" id="sublocs-group">
+	<li class='list-group-item'>Description</li>
+	<li class='list-group-item'>{{ currentloc.description }}</li>
+	</ul>
+	{% else %}
+	<ul class="list-group" id="sublocs-group">
+	<li class='list-group-item'>
+	Vous êtes à la racine de vos localisations. Utilisez le bouton + pour ajouter une localisation.
+	</li>
+	</ul>
+	{% endif %}</div>
+	
+	<div class="col-md-4">
+	<ul class="list-group" id="sublocs-group">
+{% if sublocs|length > 0  %}
+	<li class='list-group-item'>Sous-localisations</li>
+	{% for loc in sublocs %}
+ <li class="list-group-item">	<a href="{% url 'locgeo' %}{{ urlpref|urlencode }}{{ loc.name|urlencode:"" }}">{{ loc.name }}</a></li>
+	{% endfor %}
+{% elif currentloc.depth == 3 %}
+	<li class='list-group-item'>Localisation complète</li>
+{% else %}
+	<li class='list-group-item'>Pas de sous-localisations</li> 
+{% endif %}
+	</ul></div>
+	
+	<div class="col-md-4">
+	<ul class="list-group" id="sublocs-group">
+	<li class='list-group-item'>couleur de la localisation</li>
+	<li class='list-group-item col1'>&nbsp;</li>
+	<li class='list-group-item col2'>&nbsp;</li>
+	<li class='list-group-item col3'>&nbsp;</li>
+	</ul>
+	</div>
+</div>
+
+<div id="geoloc-actions">
+<!-- Panel to create new localisation -->
+<div  id="newloc-action-panel" class="action-panel">
+<div class="modal-header">
+        <button type="button" class="close" aria-label="Close" id="close-newloc-panel"><span aria-hidden="true">x</span></button>
+        <h4 class="modal-title">{% if root %}
+			Créer une nouvelle localisation
+			{% else %}
+			Créer une nouvelle sous-localisation de {{ currentloc.name }}
+			{% endif %}
+		</h4>
+      </div>
+      <form id="add-geoloc-form" action="{% url 'create' %}" method = "post">
+      <div class="modal-body">
+      	{% csrf_token %}
+        {{ form.as_p }}
+        <p>
+        <label for="">Couleur:</label>
+        <div id="conf-geoloc-buttons" class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-default" aria-label="New" id='prevcolor-button'>
+        <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></button>
+        <button type="button" class="btn btn-default" aria-label="New" id='colorbox'>&nbsp;&nbsp;&nbsp;&nbsp;</button>
+        <button type="button" class="btn btn-default" aria-label="New" id='nextcolor-button'>
+        <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></button>
+        </div></p>
+        
+        <input type="hidden" name="father-name" value="{{ currentloc.name }}"></input>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">Créer</button>
+      </div>
+      </form>
+
+</div>
+<!-- Panel to edit localisation -->
+<div id="edit-action-panel" class="action-panel">
+<div class="modal-header">
+        <button type="button" class="close" aria-label="Close" id="close-edit-panel"><span aria-hidden="true">x</span></button>
+        <h4 class="modal-title">Modifier la localisation {{ currentloc.name }}</h4>
+      </div>
+      <form id="connect-form" action="{% url 'update' %}" method = "post">
+      <div class="modal-body">
+      	{% csrf_token %}
+        {{ editForm.as_p }}
+        <input type="hidden" name="loc-name" value="{{ currentloc.name }}"></input>
+        <p>
+        <label for="">Couleur:</label>
+        <div id="conf-geoloc-edit-buttons" class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-default" aria-label="New" id='prevcolor-edit-button'>
+        <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></button>
+        <button type="button" class="btn btn-default" aria-label="New" id='colorbox-edit'>&nbsp;&nbsp;&nbsp;&nbsp;</button>
+        <button type="button" class="btn btn-default" aria-label="New" id='nextcolor-edit-button'>
+        <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></button>
+        </div></p>
+        <!-- <input type="hidden" name="father-name" value="{{ currentloc.ancestor.name }}"></input> -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">Modifier</button>
+      </div>
+      </form>
+</div>
+
+<!-- Panel to erase localisation -->
+<div id="erase-action-panel" class="action-panel">
+	<div class="modal-header">
+        <button type="button" class="close" aria-label="Close" id="close-erase-panel"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Effacer</h4>
+      </div>
+      <form id="add-geoloc-form" action="{% url 'delete' %}" method = "post">
+      {% csrf_token %}
+      <input type="hidden" name="loc-name" value="{{ currentloc.name }}"></input>
+      <div class="modal-body">
+        Voulez vous vraiment effacer la localisation {{ currentloc.name }}?
+        {% if sublocs|length > 0  %}
+        Attention, les sous-localisations suivantes seront détruites:
+        <ul>
+		{% for loc in sublocs %}
+ 		<li>{{ loc.name }}</li>
+		{% endfor %}
+		</ul>
+		ainsi que leurs sous-localisations respectives.
+		{% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">Confirmer</button>
+      </div>
+      </form>
+</div>
+
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block customJs %}
+	{% include "js/locs.js" %}
+{% endblock %}

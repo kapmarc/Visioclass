@@ -1,0 +1,5 @@
+Veuillez confirmer votre inscription à Visioclass dans les {{ expiration_days }} jours suivant la récéption de cet email.
+
+Clé d'activation: {{ activation_key }}
+
+Site: {{ Site }}

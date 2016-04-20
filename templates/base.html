@@ -1,0 +1,74 @@
+<?xml version ="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE html>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+
+	{% load staticfiles %}
+  <head>
+      <meta charset="utf-8"></meta>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+      <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+      <title>Visioclass, le classement pour tous</title>
+
+      <link href="{% static 'mystyle.css' %}" rel="stylesheet"></link>
+      <!-- Bootstrap CSS -->
+      <link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet"></link>
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"></link>
+  </head>
+
+  <body>
+    {% block navbar %}
+    {% if user.is_authenticated %}
+    	{% include "navbars/navbar_co.html" %}
+    
+	{% else %}
+		{% if disable_right_navbar %}
+			{%include "navbars/navbar_ucon.html" %}
+		{% endif %}
+		{%include "navbars/navbar_ucon.html" %}
+	{% endif %}
+    
+    
+	{% endblock %}
+<div id="content">
+	{% block bodycontent %}
+	
+	
+	
+    {%endblock %}
+    {% if not user.is_authenticated %}
+    <!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+        <h4 class="modal-title" id="myModalLabel">Connexion</h4>
+      </div>
+      <form id="connect-form" action="{% url 'connexion' %}" method = "post">
+      <div class="modal-body">
+      	{% csrf_token %}
+        {{ form.as_p }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">Connecter</button>
+        <span id="forgotten_pw"><a href="#">Mot de passe oublié</a></span>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+    {% endif %}
+</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+	<!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script type="text/javascript">
+    {% block customJs %}
+    {% endblock %}
+    </script>
+  </body>
+
+</html>

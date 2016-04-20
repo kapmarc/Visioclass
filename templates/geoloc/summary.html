@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load staticfiles %} 
+
+{% block bodycontent %}
+
+<div id="nav-tabs-geoloc">
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a href="{% url 'summary' %}">Résumé</a></li>
+  <li role="presentation"><a href="{% url 'locgeo' %}">Gérer</a></li>
+</ul></div>
+<div id="geoloc_pane">
+<figure class=highlight><pre>
+{% for locs1 in userlocs1 %}{% if forloop.last %}└{% else %}├{% endif %}── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}">{{ locs1.name }}</a>
+{% for locs2 in userlocs2 %}{% if locs2.ancestor == locs1 %}{% if forloop.parentloop.last %} {% else %}|{% endif %}   {% if forloop.last %}└{% else %}├{% endif %}── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}/{{ locs2.name|urlencode:"" }}">{{ locs2.name }}</a>
+{% endif %}{% for locs3 in userlocs3 %}{% if locs3.ancestor == locs2 %}{% if forloop.parentloop.parentloop.last %} {% else %}|{% endif %}   {% if forloop.parentloop.last %} {% else %}|{% endif %}   {% if forloop.last %}└{% else %}├{% endif %}── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}/{{ locs2.name|urlencode:"" }}/{{ locs3.name|urlencode:"" }}">{{ locs3.name }}</a>
+{% endif %}{% endfor %}{% endfor %}{% endfor %}
+
+
+{% for locs1 in userlocs1 %}─── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}">{{ locs1.name }}</a>
+{% for locs2 in userlocs2 %}{% if locs2.ancestor == locs1 %}─────── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}/{{ locs2.name|urlencode:"" }}">{{ locs2.name }}</a>
+{% endif %}{% for locs3 in userlocs3 %}{% if locs3.ancestor == locs2 %}─────────── <a href="{% url 'locgeo' %}{{ locs1.name|urlencode:"" }}/{{ locs2.name|urlencode:"" }}/{{ locs3.name|urlencode:"" }}">{{ locs3.name }}</a>
+{% endif %}{% endfor %}{% endfor %}{% endfor %}
+</pre></figure>
+</div>
+
+
+{% endblock %}

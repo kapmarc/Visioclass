@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load staticfiles %} 
+
+{% block bodycontent %}
+	<h2>Inscription à Visioclass</h2>
+	<div id="register-form-div">
+	<form id="register-form" action="." method = "post">{% csrf_token %}
+        	{{ form.as_p }}
+        <input type="submit" value="Confirmer" />
+    </form>
+    </div>
+{% endblock %}

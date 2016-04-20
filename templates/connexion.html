@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load staticfiles %} 
+
+{% block bodycontent %}
+{% if error %}
+<p><strong>Utilisateur inexistant ou mauvais de mot de passe.</strong></p>
+{% endif %}
+
+{% if user.is_authenticated %}
+<p>Vous êtes connecté, {{ user.username }} !</p>
+{% endif %}
+{% endblock %}
